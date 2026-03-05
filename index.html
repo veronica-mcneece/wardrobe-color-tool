@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wardrobe Matchmaker AI</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <header>
+      <h1>🎀 Wardrobe Matchmaker AI</h1>
+      <p class="subtitle">
+        AI-driven color harmony, aesthetic intelligence, and climate awareness.
+      </p>
+    </header>
+
+    <section class="card">
+      <h2>Add Garment</h2>
+
+      <input type="file" id="imageInput" accept="image/*" />
+
+      <select id="garmentType">
+        <option value="top">Top</option>
+        <option value="bottom">Bottom</option>
+        <option value="outerwear">Outerwear</option>
+        <option value="shoes">Shoes</option>
+      </select>
+
+      <button id="addButton">Add</button>
+    </section>
+
+    <section class="card">
+      <h2>Environment</h2>
+
+      <input type="number" id="temperatureInput" placeholder="Temperature °F" />
+
+      <select id="aestheticMode">
+        <option value="balanced">Balanced</option>
+        <option value="minimalist">Minimalist</option>
+        <option value="bold">Bold</option>
+        <option value="neutral">Neutral</option>
+      </select>
+    </section>
+
+    <section class="card">
+      <h2>Your Wardrobe</h2>
+      <div id="wardrobeDisplay" class="wardrobe-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Generate Outfit</h2>
+      <button id="pairButton">Generate Look</button>
+
+      <div id="pairingResult"></div>
+
+      <div class="meter-container">
+        <div>
+          Harmony
+          <div class="meter"><div id="harmonyMeter"></div></div>
+        </div>
+
+        <div>
+          Contrast
+          <div class="meter"><div id="contrastMeter"></div></div>
+        </div>
+
+        <div>
+          Temperature Fit
+          <div class="meter"><div id="climateMeter"></div></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Prompt user for a username once per session
+    let username = localStorage.getItem('wardrobeUser');
+    if (!username) {
+      username = prompt("Enter your username:");
+      if (!username) username = "guest";
+      localStorage.setItem('wardrobeUser', username);
+    }
+
+    const addButton = document.getElementById('addButton');
+    const imageInput = document.getElementById('imageInput');
+    const garmentType = document.getElementById('garmentType');
+    const wardrobeDisplay = document.getElementById('wardrobeDisplay');
+
+    // Load user's wardrobe from localStorage
+    let wardrobe = JSON.parse(localStorage.getItem(`wardrobe_${username}`)) || [];
+
+    function renderWardrobe() {
+      wardrobeDisplay.innerHTML = '';
+      wardrobe.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'wardrobe-item';
+        div.innerHTML = `<strong>${item.type}</strong><br><img src="${item.img}" alt="${item.type}" width="80">`;
+        wardrobeDisplay.appendChild(div);
+      });
+    }
+
+    renderWardrobe();
+
+    addButton.addEventListener('click', () => {
+      const file = imageInput.files[0];
+      if (!file) return alert("Please select an image.");
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imgData = e.target.result;
+        wardrobe.push({ type: garmentType.value, img: imgData });
+        localStorage.setItem(`wardrobe_${username}`, JSON.stringify(wardrobe));
+        renderWardrobe();
+        imageInput.value = ''; // reset input
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Pairing logic placeholder
+    const pairButton = document.getElementById('pairButton');
+    const pairingResult = document.getElementById('pairingResult');
+    pairButton.addEventListener('click', () => {
+      if (!wardrobe.length) return alert("Add some garments first!");
+      pairingResult.textContent = "🎉 Outfit generated (mock logic)";
+    });
+  </script>
+</body>
+</html>
