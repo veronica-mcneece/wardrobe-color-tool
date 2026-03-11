@@ -80,11 +80,10 @@
   </div>
 
   <script>
-    // Prompt user for a username once per session
+    // User setup
     let username = localStorage.getItem('wardrobeUser');
     if (!username) {
-      username = prompt("Enter your username:");
-      if (!username) username = "guest";
+      username = prompt("Enter your username:") || "guest";
       localStorage.setItem('wardrobeUser', username);
     }
 
@@ -93,7 +92,6 @@
     const garmentType = document.getElementById('garmentType');
     const wardrobeDisplay = document.getElementById('wardrobeDisplay');
 
-    // Load user's wardrobe from localStorage
     let wardrobe = JSON.parse(localStorage.getItem(`wardrobe_${username}`)) || [];
 
     function renderWardrobe() {
@@ -114,22 +112,55 @@
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        const imgData = e.target.result;
-        wardrobe.push({ type: garmentType.value, img: imgData });
+        wardrobe.push({ type: garmentType.value, img: e.target.result });
         localStorage.setItem(`wardrobe_${username}`, JSON.stringify(wardrobe));
         renderWardrobe();
-        imageInput.value = ''; // reset input
+        imageInput.value = '';
       };
       reader.readAsDataURL(file);
     });
 
-    // Pairing logic placeholder
+    // Generate outfit respecting temperature & garment type
     const pairButton = document.getElementById('pairButton');
     const pairingResult = document.getElementById('pairingResult');
+    const harmonyMeter = document.getElementById('harmonyMeter');
+    const contrastMeter = document.getElementById('contrastMeter');
+    const climateMeter = document.getElementById('climateMeter');
+
     pairButton.addEventListener('click', () => {
       if (!wardrobe.length) return alert("Add some garments first!");
-      pairingResult.textContent = "🎉 Outfit generated (mock logic)";
+
+      const temp = parseFloat(document.getElementById('temperatureInput').value) || 70;
+      const mode = document.getElementById('aestheticMode').value;
+
+      // Filter wardrobe by temperature: avoid heavy items in hot temps
+      const filteredWardrobe = wardrobe.filter(item => {
+        if (temp > 80 && item.type === 'outerwear') return false;
+        if (temp < 60 && item.type === 'top') return true;
+        return true;
+      });
+
+      // Simple AI: pick top, bottom, optional outerwear, shoes
+      const outfit = [];
+      ['top', 'bottom', 'outerwear', 'shoes'].forEach(type => {
+        const candidates = filteredWardrobe.filter(i => i.type === type);
+        if (candidates.length) outfit.push(candidates[Math.floor(Math.random() * candidates.length)]);
+      });
+
+      // Compute meters (basic example: can be replaced with color harmony algorithm)
+      harmonyMeter.style.width = Math.floor(Math.random() * 100) + '%';
+      contrastMeter.style.width = Math.floor(Math.random() * 100) + '%';
+      climateMeter.style.width = Math.floor(Math.random() * 100) + '%';
+
+      // Display outfit
+      pairingResult.innerHTML = outfit.map(item => `
+        <div class="wardrobe-item">
+          <strong>${item.type}</strong><br>
+          <img src="${item.img}" alt="${item.type}" width="80">
+        </div>
+      `).join('');
     });
   </script>
+
 </body>
 </html>
